@@ -10,44 +10,42 @@ nltk.download('stopwords')
 # !pip install bs4
 from bs4 import BeautifulSoup
 
-# Carregar a imagem a partir do arquivo
+#imagem de apresentação
 imagem = 'alexandria.png'
-
-# Exibir a imagem no Streamlit
 st.image(imagem)
 
 
-# Função para realizar a pesquisa e extrair informações dos resultados
+#função para realizar a pesquisa e extrair informações dos resultados
 def realizar_pesquisa(termo_pesquisa):
     url = f"https://scholar.google.com/scholar?q={termo_pesquisa}"
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
 
-    # Extrair informações dos resultados de pesquisa
+    #extrair informações dos resultados de pesquisa
     resultados = soup.find_all('div', {'class': 'gs_ri'})
     titulos = [resultado.find('h3', {'class': 'gs_rt'}).text for resultado in resultados]
     autores = [resultado.find('div', {'class': 'gs_a'}).text for resultado in resultados]
     resumos = [resultado.find('div', {'class': 'gs_rs'}).text for resultado in resultados]
     anos = [resultado.find('div', {'class': 'gs_a'}).text.split('-')[-1].strip() for resultado in resultados]
 
-    # Retornar os dados extraídos
+    #retornar os dados extraídos
     return titulos, autores, resumos, anos
 
-# Configuração da página Streamlit
+#configuração da página Streamlit
 st.title("Análise de Artigos Científicos no Google Scholar")
 
-# Obtenção do termo de pesquisa
+#obtenção do termo de pesquisa
 termo_pesquisa = st.text_input("Digite o termo a ser pesquisado:", value='')
 
-# Adiciona um botão na página
+#adiciona um botão na página
 botao_pressionado = st.button("Pesquisar")
 
-# Executa ação quando o botão for pressionado
+#executa ação quando o botão for pressionado
 if botao_pressionado:
-    # Realiza a pesquisa e extrai informações dos resultados
+    #realiza a pesquisa e extrai informações dos resultados
     titulos, autores, resumos, anos = realizar_pesquisa(termo_pesquisa)
 
-    # Exibe os resultados na página
+    #exibe os resultados na página
     st.header("Resultados da Pesquisa:")
     for titulo, autor, resumo, ano in zip(titulos, autores, resumos, anos):
         st.subheader(titulo)
@@ -56,7 +54,7 @@ if botao_pressionado:
         st.write(f"Resumo: {resumo}")
         st.write("---")
 
-    # Análise de frequência de palavras-chave com base no TF-IDF
+    #análise de frequência de palavras-chave com base no TF-IDF
     st.header("Análise de Frequência de Palavras-Chave (TF-IDF)")
     stopwords_nltk = stopwords.words('english')
     vectorizer = TfidfVectorizer(stop_words=stopwords_nltk)
@@ -73,7 +71,7 @@ if botao_pressionado:
     ax.set_title('Termos Mais Importantes (TF-IDF)')
     st.pyplot(fig)
 
-    # Nuvem de palavras
+    #nuvem de palavras
     st.header("Nuvem de Palavras")
     text = ' '.join(resumos)
     wordcloud = WordCloud(width=800, height=400).generate(text)
@@ -83,7 +81,7 @@ if botao_pressionado:
     st.pyplot(fig)
 
 
-    # Análise de Coocorrência de Palavras
+    #análise de Coocorrência de Palavras
     st.header("Análise de Coocorrência de Palavras")
     coocorrencia = Counter()
     for resumo in resumos:
@@ -93,7 +91,7 @@ if botao_pressionado:
     termos_coocorrencia = [' '.join(termo) for termo in termos_coocorrencia]
     frequencias_coocorrencia = list(frequencias_coocorrencia)
     
-    # Definir quantidade limite de coocorrências a serem exibidas
+    #definir quantidade limite de coocorrências a serem exibidas
     limite_coocorrencias = 20
     termos_coocorrencia = termos_coocorrencia[:limite_coocorrencias]
     frequencias_coocorrencia = frequencias_coocorrencia[:limite_coocorrencias]
